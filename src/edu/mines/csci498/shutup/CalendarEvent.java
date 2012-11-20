@@ -6,6 +6,7 @@
 
 package edu.mines.csci498.shutup;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class CalendarEvent {
@@ -25,10 +26,19 @@ public class CalendarEvent {
 	
 	@Override
 	public String toString() {
-		return "CalendarEvent [title=" + title + ", start=" + start + ", end="
-				+ end + ", allDay=" + allDay + "]";
+		return "CalendarEvent [title=" + title + ", start=" + getStartString() + ", end="
+				+ getEndString() + ", allDay=" + allDay + "]";
 	}
-
+	
+	public String getStartString() {
+		SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy - h:mm aaa");
+		return format.format(start.getTime());
+	}
+	
+	public String getEndString() {
+		SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy - h:mm aaa");
+		return format.format(end.getTime());
+	}
 	public String getTitle() {
 		return title;
 	}
