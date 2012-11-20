@@ -1,20 +1,23 @@
 package edu.mines.csci498.shutup;
 
+import java.util.List;
+
+import android.app.ListActivity;
 import android.os.Bundle;
-import android.app.Activity;
-import android.view.Menu;
 
-public class ShutUp extends Activity {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.shut_up);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.shut_up, menu);
-        return true;
-    }
+public final class ShutUp extends ListActivity {
+	
+	private CalendarReader reader;
+	private List<CalendarEvent> events;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.shut_up);
+		
+		reader = new CalendarReader();
+		events = reader.readCalendar(this);
+	}
 }
+
