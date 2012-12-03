@@ -58,18 +58,19 @@ public class CalendarReader {
 
 			// Find column names at core/java/android/provider/Calendar.java
 			Cursor eventCursor = contentResolver.query(builder.build(),
-					new String[] { "title", "begin", "end", "allDay"}, "Calendars._id=" + id,
+					new String[] { "title", "begin", "end", "event_id"}, "Calendars._id=" + id,
 					null, "startDay ASC, startMinute ASC"); 
 			eventCursor.moveToFirst();
 			
-			while (eventCursor.moveToNext()) {
+			do {
 				String title = eventCursor.getString(0);
 				long start = eventCursor.getLong(1);
 				long end = eventCursor.getLong(2);
+				int eventId = eventCursor.getInt(3);
 				
-				CalendarEvent e = new CalendarEvent(title, start, end);
+				CalendarEvent e = new CalendarEvent(title, start, end, eventId);
 				events.add(e);
-			}
+			} while (eventCursor.moveToNext());
 			eventCursor.close();
 		}
 		
