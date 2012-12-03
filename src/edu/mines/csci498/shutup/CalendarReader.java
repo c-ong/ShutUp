@@ -8,9 +8,7 @@
 package edu.mines.csci498.shutup;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,8 +49,6 @@ public class CalendarReader {
 	private List<CalendarEvent> getEvents(Set<String> calendarIds) {
 		List<CalendarEvent> events = new ArrayList<CalendarEvent>();		
 		long now = new Date().getTime();
-		Calendar start = GregorianCalendar.getInstance();
-		Calendar end = GregorianCalendar.getInstance();
 		
 		// For each calendar, display all the events from now to the end of next week.
 		for (String id : calendarIds) {
@@ -68,11 +64,10 @@ public class CalendarReader {
 			
 			while (eventCursor.moveToNext()) {
 				String title = eventCursor.getString(0);
-				start.setTimeInMillis(eventCursor.getLong(1));
-				end.setTimeInMillis(eventCursor.getLong(2));
-				boolean allDay = !eventCursor.getString(3).equals("0");
+				long start = eventCursor.getLong(1);
+				long end = eventCursor.getLong(2);
 				
-				CalendarEvent e = new CalendarEvent(title, start, end, allDay);
+				CalendarEvent e = new CalendarEvent(title, start, end);
 				events.add(e);
 			}
 			eventCursor.close();

@@ -8,36 +8,40 @@ package edu.mines.csci498.shutup;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class CalendarEvent {
 	
-	private String title;
-	private Calendar start;
-	private Calendar end;
-	private boolean allDay;
+	private static Calendar calendar;
 	
-	public CalendarEvent(String title, Calendar start, Calendar end, boolean allDay) {
+	private String title;
+	private long startTime;
+	private long endTime;
+	
+	public CalendarEvent(String title, long start, long end) {
 		super();
 		this.title = title;
-		this.start = start;
-		this.end = end;
-		this.allDay = allDay;
+		this.startTime = start;
+		this.endTime = end;
+		calendar = GregorianCalendar.getInstance();
 	}
 	
 	@Override
 	public String toString() {
 		return "CalendarEvent [title=" + title + ", start=" + getStartString() + ", end="
-				+ getEndString() + ", allDay=" + allDay + "]";
+				+ getEndString() + "]";
 	}
 	
 	public String getStartString() {
 		SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy - h:mm aaa");
-		return format.format(start.getTime());
+		calendar.setTimeInMillis(startTime);
+		return format.format(calendar.getTime());
 	}
 	
 	public String getEndString() {
 		SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy - h:mm aaa");
-		return format.format(end.getTime());
+		calendar.setTimeInMillis(endTime);
+		return format.format(calendar.getTime());
 	}
 	public String getTitle() {
 		return title;
@@ -45,23 +49,20 @@ public class CalendarEvent {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public Calendar getStart() {
-		return start;
-	}
-	public void setStart(Calendar start) {
-		this.start = start;
-	}
-	public Calendar getEnd() {
-		return end;
-	}
-	public void setEnd(Calendar end) {
-		this.end = end;
-	}
-	public boolean isAllDay() {
-		return allDay;
-	}
-	public void setAllDay(boolean allDay) {
-		this.allDay = allDay;
+	
+	public long getStartTime() {
+		return startTime;
 	}
 
+	public void setStartTime(long startTime) {
+		this.startTime = startTime;
+	}
+
+	public long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(long endTime) {
+		this.endTime = endTime;
+	}
 }
