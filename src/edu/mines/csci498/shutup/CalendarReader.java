@@ -60,6 +60,13 @@ public class CalendarReader {
 			Cursor eventCursor = contentResolver.query(builder.build(),
 					new String[] { "title", "begin", "end", "event_id"}, "Calendars._id=" + id,
 					null, "startDay ASC, startMinute ASC"); 
+			if (eventCursor.getCount()  <= 0) {
+				Log.e("CalendarReader", "No events found!");
+				//TODO: Throw exception?
+				CalendarEvent e = new CalendarEvent("No events found", System.currentTimeMillis(), System.currentTimeMillis(), 0);
+				events.add(e);
+				return events;
+			}
 			eventCursor.moveToFirst();
 			
 			do {
