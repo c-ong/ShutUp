@@ -127,7 +127,7 @@ public final class ShutUp extends ListActivity {
 
 		void populateFrom(CalendarEvent e) {
 			title.setText(e.getTitle());
-			time.setText(e.getStartTime() + " - " + e.getEndTime());
+			time.setText(e.getStartString() + " \nto " + e.getEndString());
 		}
 
 	}
