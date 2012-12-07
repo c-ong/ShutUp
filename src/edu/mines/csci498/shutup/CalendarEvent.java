@@ -18,13 +18,15 @@ public class CalendarEvent {
 	private long startTime;
 	private long endTime;
 	private int eventId;
+	private RingVolume volume;
 	
-	public CalendarEvent(String title, long start, long end, int eventId) {
+	public CalendarEvent(String title, long start, long end, int eventId, RingVolume volume) {
 		super();
 		this.title = title;
 		this.startTime = start;
 		this.endTime = end;
 		this.eventId = eventId;
+		this.volume = volume;
 		calendar = GregorianCalendar.getInstance();
 	}
 	
@@ -80,5 +82,12 @@ public class CalendarEvent {
 	}
 	public void setEventId(int eventId) {
 		this.eventId = eventId;
+	}
+
+	public RingVolume getVolume() {
+		return volume;
+	}
+	public void setVolume(RingVolume volume) {
+		this.volume = volume;
 	}
 }

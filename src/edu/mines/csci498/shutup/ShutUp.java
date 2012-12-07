@@ -8,7 +8,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -49,7 +48,8 @@ public final class ShutUp extends ListActivity {
 				CalendarEvent e = new CalendarEvent(helper.getTitle(c), 
 						Long.parseLong(helper.getStartTime(c)),
 						Long.parseLong(helper.getEndTime(c)),
-						Integer.parseInt(helper.getId(c)));
+						Integer.parseInt(helper.getId(c)),
+						RingVolume.values()[Integer.parseInt(helper.getRingVolume(c)) - 1]);
 				//events.add(e);
 				adapter.add(e);
 
@@ -119,10 +119,11 @@ public final class ShutUp extends ListActivity {
 
 		private TextView title;
 		private TextView time;
-
+		
 		CalendarEventHolder(View row) {
 			title = ((TextView)row.findViewById(R.id.title));
-			time = ((TextView)row.findViewById(R.id.time));		
+			time = ((TextView)row.findViewById(R.id.time));	
+			//row.setBackgroundColor(getResources().getColor(R.color.green));
 		}
 
 		void populateFrom(CalendarEvent e) {

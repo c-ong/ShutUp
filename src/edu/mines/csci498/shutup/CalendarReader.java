@@ -63,7 +63,7 @@ public class CalendarReader {
 			if (eventCursor.getCount()  <= 0) {
 				Log.e("CalendarReader", "No events found!");
 				//TODO: Throw exception?
-				CalendarEvent e = new CalendarEvent("No events found", System.currentTimeMillis(), System.currentTimeMillis(), 0);
+				CalendarEvent e = new CalendarEvent("No events found", System.currentTimeMillis(), System.currentTimeMillis(), 0, RingVolume.NOT_SELECTED);
 				events.add(e);
 				return events;
 			}
@@ -75,7 +75,7 @@ public class CalendarReader {
 				long end = eventCursor.getLong(2);
 				int eventId = eventCursor.getInt(3);
 				
-				CalendarEvent e = new CalendarEvent(title, start, end, eventId);
+				CalendarEvent e = new CalendarEvent(title, start, end, eventId, RingVolume.NOT_SELECTED);
 				events.add(e);
 			} while (eventCursor.moveToNext());
 			eventCursor.close();
