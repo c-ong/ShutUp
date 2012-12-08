@@ -87,14 +87,23 @@ public final class ShutUp extends ListActivity {
 		//audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_SHOW_UI + AudioManager.FLAG_PLAY_SOUND);	
 	}
 
+	/**
+	 * Handles populating the ListView with Calendar Events
+	 *
+	 */
 	class CalendarEventAdapter extends ArrayAdapter<CalendarEvent> {
 
 		CalendarEventAdapter(Context context, int row, List<CalendarEvent> e) {
 			super(context, row, e);
 		}
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return initializeRow(position, parent, convertView);
-		}
+
+		/**
+		 * Initializes row with event data
+		 * @param position - position in list
+		 * @param parent - necessary for inflating layout
+		 * @param row - row to put event data in
+		 * @return - the initialized view for the row
+		 */
 		private View initializeRow(int position, ViewGroup parent, View row) {
 			CalendarEventHolder holder;
 			if( row == null ){
@@ -102,30 +111,75 @@ public final class ShutUp extends ListActivity {
 				holder = new CalendarEventHolder(row);
 				row.setTag(holder);
 			} else {
-				holder = (CalendarEventHolder)row.getTag();				
+				holder = (CalendarEventHolder) row.getTag();				
 			}
 			holder.populateFrom(events.get(position));
+			updateRowColorsFromRingVolume(row, events.get(position).getVolume());
 			return row;
 		}
+
+		/**
+		 * Updates background and text of row according to ring volume
+		 * @param row - row to update color for
+		 * @param volume - ring volume for current event
+		 */
+		private void updateRowColorsFromRingVolume(View row, RingVolume volume) {
+			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
+			switch (volume) {
+			case NOT_SELECTED:
+				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.grey));
+				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
+				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
+				break;
+			case SILENT:
+				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.red));
+				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
+				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
+				break;
+			case VIBRATE:
+				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.yellow));
+				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
+				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
+				break;
+			case LOUD:
+				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.green));
+				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
+				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
+				break;
+			}	
+		}
+
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			return initializeRow(position, parent, convertView);
+		}
+		
 		public int getViewTypeCount() {
 			return 1;
 		}
+
 		public int getItemViewType(int position) {
 			return 1;
 		}
 	}
 
+	/**
+	 * This class allows us to use the ViewHolder pattern to make our ListView more efficient
+	 */
 	static class CalendarEventHolder {
 
 		private TextView title;
 		private TextView time;
-		
+
 		CalendarEventHolder(View row) {
 			title = ((TextView)row.findViewById(R.id.title));
 			time = ((TextView)row.findViewById(R.id.time));	
-			//row.setBackgroundColor(getResources().getColor(R.color.green));
 		}
 
+		/**
+		 * Populates the holder with the event details
+		 * @param e - event to populate
+		 */
 		void populateFrom(CalendarEvent e) {
 			title.setText(e.getTitle());
 			time.setText(e.getStartString() + " \nto " + e.getEndString());
