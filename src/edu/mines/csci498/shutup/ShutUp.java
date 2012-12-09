@@ -1,6 +1,8 @@
 package edu.mines.csci498.shutup;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.app.ListActivity;
@@ -8,15 +10,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.support.v4.widget.CursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 public final class ShutUp extends ListActivity {
 
 	private CalendarReader reader;
-	private List<CalendarEvent> events;
+	private Cursor eventCursor;
 	private EventHelper helper;
 	private AudioManager audioManager;
 	private CalendarEventAdapter adapter;
@@ -27,34 +29,9 @@ public final class ShutUp extends ListActivity {
 		setContentView(R.layout.shut_up);
 
 		reader = new CalendarReader();
-		helper = new EventHelper(this);
-		events = new ArrayList<CalendarEvent>();
 
-		adapter = new CalendarEventAdapter(this, R.layout.row, events);
-		setListAdapter(adapter);
-
-		initializeEvents();
+		configureList();
 		refreshEvents();
-	}
-
-	/** 
-	 * Adds all events in database to event list at start of application 
-	 */
-	private void initializeEvents() {
-		Cursor c = helper.getAllEvents();
-		if (c.getCount() > 0) {
-			c.moveToFirst();
-			do {
-				CalendarEvent e = new CalendarEvent(helper.getTitle(c), 
-						Long.parseLong(helper.getStartTime(c)),
-						Long.parseLong(helper.getEndTime(c)),
-						Integer.parseInt(helper.getId(c)),
-						RingVolume.values()[Integer.parseInt(helper.getRingVolume(c)) - 1]);
-				//events.add(e);
-				adapter.add(e);
-
-			} while (c.moveToNext());
-		}
 	}
 
 	/** 
@@ -65,10 +42,27 @@ public final class ShutUp extends ListActivity {
 		for (CalendarEvent e : eventsFromReader) {
 			if (!helper.eventInDatabase(e.getEventId())) {
 				helper.insert(e.getEventId(), e.getTitle(), e.getStartTime(), e.getEndTime(), RingVolume.NOT_SELECTED.getId());
-				//events.add(e);
-				adapter.add(e);
 			}	
 		}
+		//TODO: Delete old events
+	}
+
+	/**
+	 * Configures the database helper and cursor and sets the adapter for the list
+	 */
+	//TODO: Try using a CursorLoader
+	private void configureList() {
+		helper = new EventHelper(this);
+		
+		if (eventCursor != null) {
+			stopManagingCursor(eventCursor);
+			eventCursor.close();
+		}
+		eventCursor = helper.getAllEvents();
+		startManagingCursor(eventCursor);
+		adapter = new CalendarEventAdapter(eventCursor);
+		
+		setListAdapter(adapter);
 	}
 
 	//Testing
@@ -91,30 +85,38 @@ public final class ShutUp extends ListActivity {
 	 * Handles populating the ListView with Calendar Events
 	 *
 	 */
-	class CalendarEventAdapter extends ArrayAdapter<CalendarEvent> {
+	class CalendarEventAdapter extends CursorAdapter {
 
-		CalendarEventAdapter(Context context, int row, List<CalendarEvent> e) {
-			super(context, row, e);
+		CalendarEventAdapter(Cursor c) {
+			super(ShutUp.this, c, 0);
 		}
 
 		/**
-		 * Initializes row with event data
-		 * @param position - position in list
-		 * @param parent - necessary for inflating layout
-		 * @param row - row to put event data in
-		 * @return - the initialized view for the row
+		 * Binds row with event data
+		 * @param row - row to put event data in (existing view)
+		 * @param context - interface to application's global information
+		 * @param cursor - the cursor from which to get the data
 		 */
-		private View initializeRow(int position, ViewGroup parent, View row) {
-			CalendarEventHolder holder;
-			if( row == null ){
-				row = getLayoutInflater().inflate(R.layout.row, parent, false);
-				holder = new CalendarEventHolder(row);
-				row.setTag(holder);
-			} else {
-				holder = (CalendarEventHolder) row.getTag();				
-			}
-			holder.populateFrom(events.get(position));
-			updateRowColorsFromRingVolume(row, events.get(position).getVolume());
+		@Override
+		public void bindView(View row, Context ctx, Cursor c) {
+			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
+			holder.populateFrom(c, helper);
+			updateRowColorsFromRingVolume(row, helper.getRingVolume(c));
+		}
+
+		/**
+		 * Creates a new row with event data
+		 * @param context - interface to application's global information
+		 * @param cursor - the cursor from which to get the data
+		 * @param parent - the parent to which the new view is attached
+		 */
+		@Override
+		public View newView(Context ctx, Cursor c, ViewGroup parent) {
+			View row = getLayoutInflater().inflate(R.layout.row, parent, false);
+
+			CalendarEventHolder holder = new CalendarEventHolder(row);
+			row.setTag(holder);
+			updateRowColorsFromRingVolume(row, helper.getRingVolume(c));
 			return row;
 		}
 
@@ -123,8 +125,11 @@ public final class ShutUp extends ListActivity {
 		 * @param row - row to update color for
 		 * @param volume - ring volume for current event
 		 */
-		private void updateRowColorsFromRingVolume(View row, RingVolume volume) {
+		private void updateRowColorsFromRingVolume(View row, String volumeString) {
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
+			
+			RingVolume volume = RingVolume.values()[Integer.parseInt(volumeString) - 1];
+			
 			switch (volume) {
 			case NOT_SELECTED:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.grey));
@@ -148,19 +153,6 @@ public final class ShutUp extends ListActivity {
 				break;
 			}	
 		}
-
-
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return initializeRow(position, parent, convertView);
-		}
-		
-		public int getViewTypeCount() {
-			return 1;
-		}
-
-		public int getItemViewType(int position) {
-			return 1;
-		}
 	}
 
 	/**
@@ -170,6 +162,7 @@ public final class ShutUp extends ListActivity {
 
 		private TextView title;
 		private TextView time;
+		private static Calendar calendar = GregorianCalendar.getInstance();
 
 		CalendarEventHolder(View row) {
 			title = ((TextView)row.findViewById(R.id.title));
@@ -180,9 +173,22 @@ public final class ShutUp extends ListActivity {
 		 * Populates the holder with the event details
 		 * @param e - event to populate
 		 */
-		void populateFrom(CalendarEvent e) {
-			title.setText(e.getTitle());
-			time.setText(e.getStartString() + " \nto " + e.getEndString());
+		void populateFrom(Cursor c, EventHelper helper) {
+			title.setText(helper.getTitle(c));
+			time.setText(formatDateString(Long.parseLong(helper.getStartTime(c))) + 
+					" \nto " + 
+					formatDateString(Long.parseLong(helper.getStartTime(c))));
+		}
+
+		/**
+		 * Formats a long into a human readable date
+		 * @param date - date to format
+		 * @return string of date in human readable form
+		 */
+		private String formatDateString(long date) {
+			SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy - h:mm aaa");
+			calendar.setTimeInMillis(date);
+			return format.format(calendar.getTime());
 		}
 
 	}
