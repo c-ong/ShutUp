@@ -76,15 +76,10 @@ public class EventHelper extends SQLiteOpenHelper {
 		String[] args = {id};
 		
 		cv.put("ring_volume_id", ringVolumeId);
-		
-		
-		
+			
 		if (cv.size() > 0) {
 			getWritableDatabase().update("events", cv, "_id=?", args);
-			printAllEvents();
-			//Log.i("CalendarReader", "Changing ring volume to: " + getRingVolume(getEventById(id)));
-		}
-		
+		}	
 	}
 	
 	public void update(int eventId, String id, String title, long startTime, long endTime, int ringVolumeId) {

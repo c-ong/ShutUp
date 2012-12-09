@@ -6,10 +6,10 @@
 
     <ImageButton
         android:id="@+id/buttonIcon"
-        android:contentDescription="@string/ring_volume_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_lock_silent_mode_off" />
+        android:contentDescription="@string/ring_volume_button"
+        android:src="@drawable/ic_no_selection" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,11 +19,12 @@
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
+            android:textColor="@color/black"
             android:textStyle="bold" />
 
         <TextView
@@ -33,7 +34,8 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:maxLines="2" />
+            android:maxLines="2"
+            android:textColor="@color/black" />
     </LinearLayout>
 
 </LinearLayout>
