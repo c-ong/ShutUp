@@ -11,8 +11,11 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 public final class ShutUp extends ListActivity {
@@ -22,7 +25,7 @@ public final class ShutUp extends ListActivity {
 	private EventHelper helper;
 	private AudioManager audioManager;
 	private CalendarEventAdapter adapter;
-	
+
 	// Comment Comment Comment
 
 	@Override
@@ -119,10 +122,57 @@ public final class ShutUp extends ListActivity {
 		 */
 		@Override
 		public void bindView(View row, Context ctx, Cursor c) {
+
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
 			holder.populateFrom(c, helper);
+
 			updateRowColorsFromRingVolume(row, helper.getRingVolume(c));
+			
+			holder.button.setOnClickListener(new ToggleRingerListener(c, row));
+
 		}
+		
+		class ToggleRingerListener implements View.OnClickListener {
+			
+			Cursor c;
+			View rowView;
+			
+			public ToggleRingerListener(Cursor c, View rowView) {
+				this.c = c;
+				this.rowView = rowView;
+			}
+
+			public void onClick(View v) {
+				
+				//c.
+				RingVolume volume = RingVolume.values()[Integer.parseInt(helper.getRingVolume(c)) - 1];
+				
+				
+				switch (volume) {
+				case NOT_SELECTED:
+					helper.updateRingVolume(helper.getId(c), RingVolume.SILENT.getId());
+					break;
+				case SILENT:
+					helper.updateRingVolume(helper.getId(c), RingVolume.VIBRATE.getId());
+					break;
+				case VIBRATE:
+					helper.updateRingVolume(helper.getId(c), RingVolume.LOUD.getId());
+					break;
+				case LOUD:
+					helper.updateRingVolume(helper.getId(c), RingVolume.NOT_SELECTED.getId());
+					break;
+				}
+
+				//Log.i("CalendarReader", "Database says ringer is: " + volume);
+				
+				c = helper.getEventById(helper.getId(c));
+				
+				if (c.getCount() > 0) {
+					c.moveToFirst();
+					updateRowColorsFromRingVolume(rowView, helper.getRingVolume(c));
+				}
+			}
+		};
 
 		/**
 		 * Creates a new row with event data
@@ -135,6 +185,7 @@ public final class ShutUp extends ListActivity {
 			View row = getLayoutInflater().inflate(R.layout.row, parent, false);
 
 			CalendarEventHolder holder = new CalendarEventHolder(row);
+
 			row.setTag(holder);
 			updateRowColorsFromRingVolume(row, helper.getRingVolume(c));
 			return row;
@@ -155,21 +206,25 @@ public final class ShutUp extends ListActivity {
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.grey));
 				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
 				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
+				holder.button.setImageResource(R.drawable.ic_lock_no_selection);
 				break;
 			case SILENT:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.red));
 				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
 				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
+				holder.button.setImageResource(R.drawable.ic_lock_silent_mode);
 				break;
 			case VIBRATE:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.yellow));
 				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
 				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.black));
+				holder.button.setImageResource(R.drawable.ic_lock_silent_mode_vibrate);
 				break;
 			case LOUD:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.green));
 				holder.title.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
 				holder.time.setTextColor(ShutUp.this.getResources().getColor(R.color.white));
+				holder.button.setImageResource(R.drawable.ic_lock_silent_mode_off);
 				break;
 			}	
 		}
@@ -182,11 +237,13 @@ public final class ShutUp extends ListActivity {
 
 		private TextView title;
 		private TextView time;
+		private ImageButton button;
 		private static Calendar calendar = GregorianCalendar.getInstance();
 
 		CalendarEventHolder(View row) {
 			title = ((TextView)row.findViewById(R.id.title));
 			time = ((TextView)row.findViewById(R.id.time));	
+			button = ((ImageButton)row.findViewById(R.id.buttonIcon));
 		}
 
 		/**
@@ -194,10 +251,15 @@ public final class ShutUp extends ListActivity {
 		 * @param e - event to populate
 		 */
 		void populateFrom(Cursor c, EventHelper helper) {
+
+			//final EventHelper helper = helperr;
+			//final Cursor c = cc;
+
 			title.setText(helper.getTitle(c));
 			time.setText(formatDateString(Long.parseLong(helper.getStartTime(c))) + 
 					" \nto " + 
 					formatDateString(Long.parseLong(helper.getStartTime(c))));
+
 		}
 
 		/**

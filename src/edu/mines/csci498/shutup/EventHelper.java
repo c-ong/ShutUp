@@ -70,6 +70,23 @@ public class EventHelper extends SQLiteOpenHelper {
 		}
 	}
 	
+	public void updateRingVolume(String id, int ringVolumeId) {
+		
+		ContentValues cv = new ContentValues();
+		String[] args = {id};
+		
+		cv.put("ring_volume_id", ringVolumeId);
+		
+		
+		
+		if (cv.size() > 0) {
+			getWritableDatabase().update("events", cv, "_id=?", args);
+			printAllEvents();
+			//Log.i("CalendarReader", "Changing ring volume to: " + getRingVolume(getEventById(id)));
+		}
+		
+	}
+	
 	public void update(int eventId, String id, String title, long startTime, long endTime, int ringVolumeId) {
 
 		ContentValues cv = new ContentValues();
@@ -105,6 +122,7 @@ public class EventHelper extends SQLiteOpenHelper {
 			builder.append(getTitle(c));
 			builder.append(getStartTime(c));
 			builder.append(getEndTime(c));
+			builder.append(" ");
 			builder.append(getRingVolume(c));
 			
 			Log.i("Database", builder.toString());
@@ -118,7 +136,7 @@ public class EventHelper extends SQLiteOpenHelper {
 			.rawQuery("SELECT * " +
 					"FROM events, ring_volumes " +
 					"WHERE events.ring_volume_id = ring_volumes._id " +
-					"AND events.id = ? " +
+					"AND events._id = ? " +
 					"ORDER BY start_time", 
 					args);
 	}
