@@ -29,9 +29,12 @@ public final class ShutUp extends ListActivity {
 		setContentView(R.layout.shut_up);
 
 		reader = new CalendarReader();
+		helper = new EventHelper(this);
 
-		configureList();
+		//TODO: Put these in an AsyncTask/separate thread
+		deletePastEvents();
 		refreshEvents();
+		configureList();
 	}
 
 	/** 
@@ -44,16 +47,31 @@ public final class ShutUp extends ListActivity {
 				helper.insert(e.getEventId(), e.getTitle(), e.getStartTime(), e.getEndTime(), RingVolume.NOT_SELECTED.getId());
 			}	
 		}
-		//TODO: Delete old events
+	}
+
+	/** 
+	 * Deletes past events from database (past end date)
+	 */
+	private void deletePastEvents() {
+		Cursor c = helper.getAllEvents();
+		if (c.getCount() <= 0) {
+			return; //No events in database
+		}
+		c.moveToFirst();
+		do {
+			long endTime = Long.parseLong(helper.getEndTime(c));
+			if (endTime < System.currentTimeMillis()) { //If end date is before right now, delete from database
+				helper.deleteEvent(helper.getId(c)); 
+			}
+		} while (c.moveToNext());
+		c.close();
 	}
 
 	/**
-	 * Configures the database helper and cursor and sets the adapter for the list
+	 * Configures the cursor and sets the adapter for the list
 	 */
 	//TODO: Try using a CursorLoader
 	private void configureList() {
-		helper = new EventHelper(this);
-		
 		if (eventCursor != null) {
 			stopManagingCursor(eventCursor);
 			eventCursor.close();
@@ -61,7 +79,7 @@ public final class ShutUp extends ListActivity {
 		eventCursor = helper.getAllEvents();
 		startManagingCursor(eventCursor);
 		adapter = new CalendarEventAdapter(eventCursor);
-		
+
 		setListAdapter(adapter);
 	}
 
@@ -127,9 +145,9 @@ public final class ShutUp extends ListActivity {
 		 */
 		private void updateRowColorsFromRingVolume(View row, String volumeString) {
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
-			
+
 			RingVolume volume = RingVolume.values()[Integer.parseInt(volumeString) - 1];
-			
+
 			switch (volume) {
 			case NOT_SELECTED:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.grey));

@@ -50,11 +50,12 @@ public class CalendarReader {
 		List<CalendarEvent> events = new ArrayList<CalendarEvent>();		
 		long now = new Date().getTime();
 		
-		// For each calendar, display all the events from now to the end of next week.
+		// For each calendar, display all the events from now until 2 weeks from now.
+		// TODO: Decide how far out we want to grab events
 		for (String id : calendarIds) {
 			Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
 			ContentUris.appendId(builder, now);
-			ContentUris.appendId(builder, now + DateUtils.WEEK_IN_MILLIS);
+			ContentUris.appendId(builder, now + 4 * DateUtils.WEEK_IN_MILLIS);
 
 			// Find column names at core/java/android/provider/Calendar.java
 			Cursor eventCursor = contentResolver.query(builder.build(),
