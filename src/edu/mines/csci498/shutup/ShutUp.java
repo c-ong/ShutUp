@@ -22,6 +22,8 @@ public final class ShutUp extends ListActivity {
 	private EventHelper helper;
 	private AudioManager audioManager;
 	private CalendarEventAdapter adapter;
+	
+	// Comment Comment Comment
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
