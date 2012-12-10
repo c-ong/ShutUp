@@ -69,7 +69,12 @@ public class EventHelper extends SQLiteOpenHelper {
 			getWritableDatabase().insert("events", null, cv);
 		}
 	}
-
+	
+	/**
+	 * Updates ring volume for given id
+	 * @param id - id for event to change
+	 * @param ringVolumeId - ring volume to change to
+	 */
 	public void updateRingVolume(String id, int ringVolumeId) {
 
 		ContentValues cv = new ContentValues();
@@ -137,6 +142,12 @@ public class EventHelper extends SQLiteOpenHelper {
 						args);
 	}
 
+	/**
+	 * Gets CalendarEvent object for given id
+	 * @param id - database id for event
+	 * @return CalendarEvent object for given id
+	 */
+			
 	public CalendarEvent getCalendarEventObjectById(String id) {
 		String[] args = {id};
 
@@ -154,7 +165,7 @@ public class EventHelper extends SQLiteOpenHelper {
 		}
 		c.moveToFirst();
 				
-		return new CalendarEvent(id, Long.parseLong(getStartTime(c)), Long.parseLong(getEndTime(c)),
+		return new CalendarEvent(getTitle(c), Long.parseLong(getStartTime(c)), Long.parseLong(getEndTime(c)),
 				Integer.parseInt(getEventId(c)), RingVolume.values()[Integer.parseInt(getRingVolume(c)) - 1]);
 	}
 

@@ -12,9 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.app.ListActivity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
@@ -24,7 +22,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -66,8 +63,10 @@ public final class ShutUp extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
 	        case R.id.refresh:
+	        	Log.i("ShutUp", "Refreshing...");
 	        	deletePastEvents();
 	    		refreshEvents();
+	    		configureList();
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);

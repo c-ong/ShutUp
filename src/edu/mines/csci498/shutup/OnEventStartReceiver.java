@@ -19,6 +19,7 @@ public class OnEventStartReceiver extends BroadcastReceiver {
 		if (intent != null) {
 			int volumeId = (int) intent.getIntExtra(AlarmHelper.EXTRA_VOLUME_ID, 1);
 			changeRingVolume(context, volumeId);
+			Log.i("OnEventStartReciever", "Received event!");
 		}
 		else {
 			Log.e("OnEventStartReciever", "No extra in intent!");

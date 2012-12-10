@@ -47,7 +47,7 @@ public class CalendarReader {
 		List<CalendarEvent> events = new ArrayList<CalendarEvent>();		
 		long now = new Date().getTime();
 		
-		// For each calendar, display all the events from now until 2 weeks from now.
+		// For each calendar, display all the events from now until 4 weeks from now.
 		// TODO: Decide how far out we want to grab events
 		for (String id : calendarIds) {
 			Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
@@ -61,7 +61,8 @@ public class CalendarReader {
 			if (eventCursor.getCount()  <= 0) {
 				Log.e("CalendarReader", "No events found!");
 				//TODO: Throw exception?
-				CalendarEvent e = new CalendarEvent("No events found", System.currentTimeMillis(), System.currentTimeMillis(), 0, RingVolume.NOT_SELECTED);
+				CalendarEvent e = new CalendarEvent("No events found - add some to your Google Calendar!", 
+						System.currentTimeMillis(), System.currentTimeMillis(), 0, RingVolume.NOT_SELECTED);
 				events.add(e);
 				return events;
 			}

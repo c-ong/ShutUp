@@ -1,5 +1,5 @@
 /**
- * This class handles setting and cancelling all "alarms" to change ring volume.
+ * This class handles setting and canceling all "alarms" to change ring volume.
  * @author Lauren Aberle
  * @author Thomas Brown
  */
@@ -29,12 +29,13 @@ public class AlarmHelper {
 	public static void setAlarm(Context context, CalendarEvent event) {
 		AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		int currentVolumeId = getVolumeIdForCurrentRingVolume(context);
+		
+		Log.e("AlarmHelper.StartAlarm", "Event: " + event + " Volume: " + currentVolumeId);
 
 		manager.set(AlarmManager.RTC_WAKEUP, event.getStartTime(), 
 				getPendingIntent(context, event.getEventId(), event.getRingVolume().getId())); //Event start
 		manager.set(AlarmManager.RTC_WAKEUP, event.getEndTime(),
 				getPendingIntent(context, -1 * event.getEventId(), currentVolumeId)); //Event end
-		Log.i("AlarmHelper", "Set alarm!");
 	}
 
 	/**
@@ -46,7 +47,8 @@ public class AlarmHelper {
 	public static void cancelAlarm(Context context, CalendarEvent event) {
 		AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-		manager.cancel(getPendingIntent(context, event.getEventId(), event.getRingVolume().getId()));
+		manager.cancel(getPendingIntent(context, event.getEventId(), event.getRingVolume().getId())); //EventStart
+		manager.cancel(getPendingIntent(context, -1 * event.getEventId(), event.getRingVolume().getId())); //Event end
 		Log.i("AlarmHelper", "Cancel alarm!");
 	}
 
@@ -60,7 +62,7 @@ public class AlarmHelper {
 	private static PendingIntent getPendingIntent(Context context, int eventId, int volumeId) {
 		Intent i = new Intent(context, OnEventStartReceiver.class);
 		i.putExtra(EXTRA_VOLUME_ID, volumeId);
-		return PendingIntent.getBroadcast(context, eventId, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		return PendingIntent.getBroadcast(context, eventId, i, PendingIntent.FLAG_UPDATE_CURRENT);
 	}
 
 	/**
@@ -120,12 +122,12 @@ public class AlarmHelper {
 		}
 		int componentState = (enabled ?
 				PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-					PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+				PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
 		ComponentName component = new ComponentName(context, OnEventStartReceiver.class);
 		context.getPackageManager().setComponentEnabledSetting(component, componentState, PackageManager.DONT_KILL_APP);
 
-		if (enabled) { AlarmHelper.setAlarm(context, event); }
-		else 		 { AlarmHelper.cancelAlarm(context, event);}
+		if (enabled) { AlarmHelper.setAlarm(context, event);    }
+		else 		 { AlarmHelper.cancelAlarm(context, event); }
 	}
 }
