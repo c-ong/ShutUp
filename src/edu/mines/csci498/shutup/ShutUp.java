@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public final class ShutUp extends ListActivity {
@@ -106,18 +107,23 @@ public final class ShutUp extends ListActivity {
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
 			holder.populateFrom(c, helper);
 			updateRowFromRingVolume(row, getRingVolumeEnumFromVolumeId(helper.getRingVolume(c)));
-			holder.button.setOnClickListener(new ToggleRingerListener(c, row));
+			//holder.button.setOnClickListener(new ToggleRingerListener(c, row));
+
+			row.setClickable(true);
+			row.setFocusable(true);
+			row.setBackgroundResource(android.R.drawable.menuitem_background);
+			row.setOnClickListener(new ToggleRingerListener(c, row));
 		}
-		
+
 		/**
 		 * Button click listener to toggle ring volume
 		 */
 		class ToggleRingerListener implements View.OnClickListener {
-			
+
 			String idString;
 			View rowView;
 			RingVolume volume;
-			
+
 			public ToggleRingerListener(Cursor cursor, View rowView) {
 				this.rowView = rowView;
 				idString = helper.getId(cursor);
@@ -146,7 +152,7 @@ public final class ShutUp extends ListActivity {
 					volume = RingVolume.NOT_SELECTED;
 					break;
 				}
-				
+
 				updateRowFromRingVolume(rowView, volume);
 				setEventAlarms(idString);
 			}
@@ -180,19 +186,19 @@ public final class ShutUp extends ListActivity {
 			switch (volume) {
 			case NOT_SELECTED:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.grey));
-				holder.button.setImageResource(R.drawable.ic_no_selection);
+				holder.image.setImageResource(R.drawable.ic_no_selection);
 				break;
 			case SILENT:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.red));
-				holder.button.setImageResource(R.drawable.ic_silent);
+				holder.image.setImageResource(R.drawable.ic_silent);
 				break;
 			case VIBRATE:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.yellow));
-				holder.button.setImageResource(R.drawable.ic_vibrate);
+				holder.image.setImageResource(R.drawable.ic_vibrate);
 				break;
 			case LOUD:
 				row.setBackgroundColor(ShutUp.this.getResources().getColor(R.color.green));
-				holder.button.setImageResource(R.drawable.ic_loud);
+				holder.image.setImageResource(R.drawable.ic_loud);
 				break;
 			}	
 		}
@@ -208,7 +214,7 @@ public final class ShutUp extends ListActivity {
 				return;
 			}
 			c.moveToFirst();
-			
+
 			String volumeString = helper.getRingVolume(c);
 			RingVolume volume = getRingVolumeEnumFromVolumeId(volumeString);
 			long startTime = Long.parseLong(helper.getStartTime(c));
@@ -222,7 +228,7 @@ public final class ShutUp extends ListActivity {
 			}
 			int flag = (enabled ?
 					PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-					PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+						PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
 			ComponentName component = new ComponentName(ShutUp.this, OnBootReceiver.class);
 			getPackageManager().setComponentEnabledSetting(component, flag, PackageManager.DONT_KILL_APP);
@@ -249,13 +255,13 @@ public final class ShutUp extends ListActivity {
 
 		private TextView title;
 		private TextView time;
-		private ImageButton button;
+		private ImageView image;
 		private static Calendar calendar = GregorianCalendar.getInstance();
 
 		CalendarEventHolder(View row) {
 			title = (TextView) row.findViewById(R.id.title);
 			time = (TextView) row.findViewById(R.id.time);	
-			button = (ImageButton) row.findViewById(R.id.buttonIcon);
+			image = (ImageView) row.findViewById(R.id.buttonIcon);
 		}
 
 		/**

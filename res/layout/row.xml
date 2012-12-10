@@ -4,10 +4,10 @@
     android:orientation="horizontal"
     android:padding="4dip" >
 
-    <ImageButton
+    <ImageView
         android:id="@+id/buttonIcon"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:contentDescription="@string/ring_volume_button"
         android:src="@drawable/ic_no_selection" />
 
