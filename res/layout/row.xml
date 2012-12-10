@@ -5,10 +5,10 @@
     android:padding="4dip" >
 
     <ImageView
-        android:id="@+id/buttonIcon"
+        android:id="@+id/volume_icon"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:contentDescription="@string/ring_volume_button"
+        android:contentDescription="@string/ring_volume_image"
         android:src="@drawable/ic_no_selection" />
 
     <LinearLayout

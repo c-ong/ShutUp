@@ -18,7 +18,7 @@ public class CalendarEvent {
 	private long startTime;
 	private long endTime;
 	private int eventId;
-	private RingVolume volume;
+	private RingVolume ringVolume;
 	
 	public CalendarEvent(String title, long start, long end, int eventId, RingVolume volume) {
 		super();
@@ -26,7 +26,7 @@ public class CalendarEvent {
 		this.startTime = start;
 		this.endTime = end;
 		this.eventId = eventId;
-		this.volume = volume;
+		this.ringVolume = volume;
 		calendar = GregorianCalendar.getInstance();
 	}
 	
@@ -84,10 +84,10 @@ public class CalendarEvent {
 		this.eventId = eventId;
 	}
 
-	public RingVolume getVolume() {
-		return volume;
+	public RingVolume getRingVolume() {
+		return ringVolume;
 	}
 	public void setVolume(RingVolume volume) {
-		this.volume = volume;
+		this.ringVolume = volume;
 	}
 }

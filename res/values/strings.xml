@@ -4,6 +4,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_shut_up">ShutUp</string>
-    <string name="ring_volume_button">Click to change ring volume!</string>
+    <string name="ring_volume_image">Click to change ring volume!</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

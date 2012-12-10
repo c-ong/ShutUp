@@ -1,3 +1,8 @@
+/**
+ * OnEventStartReceiver receives alarms when an event starts and changes ring volume accordingly
+ * @author Lauren Aberle
+ * @author Thomas Brown
+ */
 package edu.mines.csci498.shutup;
 
 import android.content.BroadcastReceiver;
@@ -12,20 +17,22 @@ public class OnEventStartReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (intent != null) {
-			String volumeString = (String) intent.getStringExtra(OnBootReceiver.EXTRA_VOLUME_STRING);
-			changeRingVolume(context, volumeString);
+			int volumeId = (int) intent.getIntExtra(AlarmHelper.EXTRA_VOLUME_ID, 1);
+			changeRingVolume(context, volumeId);
 		}
 		else {
 			Log.e("OnEventStartReciever", "No extra in intent!");
-		}
-			
+		}		
 	}
 
-	private void changeRingVolume(Context context, String volumeString) {
-		
+	/**
+	 * Changes system's ring volume to volume specified by volumeId
+	 * @param context - context under which to operate
+	 * @param volumeId - volume to change to
+	 */
+	private void changeRingVolume(Context context, int volumeId) {
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		
-		RingVolume volume = RingVolume.values()[Integer.parseInt(volumeString) - 1];
+		RingVolume volume = RingVolume.values()[volumeId - 1];
 		
 		switch (volume) {
 		case NOT_SELECTED:

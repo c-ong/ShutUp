@@ -27,17 +27,17 @@ public class EventHelper extends SQLiteOpenHelper {
 				"_id INTEGER PRIMARY KEY AUTOINCREMENT," +
 				"name TEXT);");
 		db.execSQL("CREATE TABLE events (" +
-			"_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-			"event_id INTEGER, " +
-			"title TEXT, " +
-			"start_time INTEGER, " +
-			"end_time INTEGER, " +
-			"ring_volume_id INTEGER, " +
-			"FOREIGN KEY(ring_volume_id) REFERENCES ring_volumes(_id));");
-		
+				"_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				"event_id INTEGER, " +
+				"title TEXT, " +
+				"start_time INTEGER, " +
+				"end_time INTEGER, " +
+				"ring_volume_id INTEGER, " +
+				"FOREIGN KEY(ring_volume_id) REFERENCES ring_volumes(_id));");
+
 		initializeRingVolumesTable(db);
 	}
-	
+
 	private void initializeRingVolumesTable(SQLiteDatabase db) {
 		ContentValues cv = new ContentValues();
 		cv.put("name", "not selected");
@@ -58,7 +58,7 @@ public class EventHelper extends SQLiteOpenHelper {
 	public void insert(int eventId, String title, long startTime, long endTime, int ringVolumeId) {
 
 		ContentValues cv = new ContentValues();
-		
+
 		cv.put("event_id", eventId);
 		cv.put("title", title);
 		cv.put("start_time", startTime);
@@ -69,19 +69,19 @@ public class EventHelper extends SQLiteOpenHelper {
 			getWritableDatabase().insert("events", null, cv);
 		}
 	}
-	
+
 	public void updateRingVolume(String id, int ringVolumeId) {
-		
+
 		ContentValues cv = new ContentValues();
 		String[] args = {id};
-		
+
 		cv.put("ring_volume_id", ringVolumeId);
-			
+
 		if (cv.size() > 0) {
 			getWritableDatabase().update("events", cv, "_id=?", args);
 		}	
 	}
-	
+
 	public void update(int eventId, String id, String title, long startTime, long endTime, int ringVolumeId) {
 
 		ContentValues cv = new ContentValues();
@@ -100,13 +100,13 @@ public class EventHelper extends SQLiteOpenHelper {
 
 	public Cursor getAllEvents() {
 		return getReadableDatabase()
-			.rawQuery("SELECT * " +
-					  "FROM events, ring_volumes " +
-					  "WHERE events.ring_volume_id = ring_volumes._id " +
-					  "ORDER BY events.start_time",
-					  null);
+				.rawQuery("SELECT * " +
+						"FROM events, ring_volumes " +
+						"WHERE events.ring_volume_id = ring_volumes._id " +
+						"ORDER BY events.start_time",
+						null);
 	}
-	
+
 	//Debugging purposes only
 	public void printAllEvents() {		
 		Cursor c = getAllEvents();
@@ -120,41 +120,62 @@ public class EventHelper extends SQLiteOpenHelper {
 			builder.append(getEndTime(c));
 			builder.append(" ");
 			builder.append(getRingVolume(c));
-			
+
 			Log.i("Database", builder.toString());
 		} while (c.moveToNext());
 	}
-	
+
 	public Cursor getEventById(String id) {
 		String[] args = {id};
-		
+
 		return getReadableDatabase()
-			.rawQuery("SELECT * " +
-					"FROM events, ring_volumes " +
-					"WHERE events.ring_volume_id = ring_volumes._id " +
-					"AND events._id = ? " +
-					"ORDER BY start_time", 
-					args);
+				.rawQuery("SELECT * " +
+						"FROM events, ring_volumes " +
+						"WHERE events.ring_volume_id = ring_volumes._id " +
+						"AND events._id = ? " +
+						"ORDER BY start_time", 
+						args);
 	}
-	
+
+	public CalendarEvent getCalendarEventObjectById(String id) {
+		String[] args = {id};
+
+		Cursor c = getReadableDatabase()
+				.rawQuery("SELECT * " +
+						"FROM events, ring_volumes " +
+						"WHERE events.ring_volume_id = ring_volumes._id " +
+						"AND events._id = ? " +
+						"ORDER BY start_time", 
+						args);
+		
+		if (!(c.getCount() > 0)) {
+			Log.e("EventHelper", "Problem setting/cancelling alarm - could not get event!");
+			return null;
+		}
+		c.moveToFirst();
+				
+		return new CalendarEvent(id, Long.parseLong(getStartTime(c)), Long.parseLong(getEndTime(c)),
+				Integer.parseInt(getEventId(c)), RingVolume.values()[Integer.parseInt(getRingVolume(c)) - 1]);
+	}
+
 	public void deleteAllEvents() {
 		Cursor eventCursor = getAllEvents();
 		eventCursor.moveToFirst();
-		
+
 		while (eventCursor.moveToNext()) {
 			deleteEvent(getId(eventCursor));
 		}
 	}
-	
+
 	public void deleteEvent(String id) {
 		String[] args = {id};
 		getWritableDatabase().execSQL(
 				"DELETE " +
-				"FROM events " +
-				"WHERE _id = ?",
-				args);
+						"FROM events " +
+						"WHERE _id = ?",
+						args);
 	}
-	
+
 	/**
 	 * Determines if an event already exists in the database
 	 * @param eventId - calendar event id for event in question
@@ -162,12 +183,12 @@ public class EventHelper extends SQLiteOpenHelper {
 	 */
 	public boolean eventInDatabase(int eventId) {
 		String[] args = {Integer.toString(eventId)};
-		
+
 		Cursor c = getReadableDatabase()
-			.rawQuery("SELECT * " +
-				      "FROM events " +
-					  "WHERE events.event_id = ?",
-					  args);
+				.rawQuery("SELECT * " +
+						"FROM events " +
+						"WHERE events.event_id = ?",
+						args);
 		c.moveToFirst();
 		int count = c.getCount();
 		if (count > 0) {
@@ -177,7 +198,7 @@ public class EventHelper extends SQLiteOpenHelper {
 			return false;
 		}
 	}
-	
+
 	public String getId(Cursor c) {
 		return c.getString(0);
 	}

@@ -1,3 +1,9 @@
+/**
+ * This class is the main activity for the ShutUp application
+ * @author Lauren Aberle
+ * @author Thomas Brown
+ */
+
 package edu.mines.csci498.shutup;
 
 import java.text.SimpleDateFormat;
@@ -13,6 +19,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -40,6 +49,31 @@ public final class ShutUp extends ListActivity {
 		configureList();
 	}
 
+	@Override
+	public void onDestroy() {
+		eventCursor.close();
+		helper.close();
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.shut_up, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case R.id.refresh:
+	        	deletePastEvents();
+	    		refreshEvents();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
 	/** 
 	 * Reads events from calendar and adds new ones to the database and event list 
 	 */
@@ -107,7 +141,6 @@ public final class ShutUp extends ListActivity {
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
 			holder.populateFrom(c, helper);
 			updateRowFromRingVolume(row, getRingVolumeEnumFromVolumeId(helper.getRingVolume(c)));
-			//holder.button.setOnClickListener(new ToggleRingerListener(c, row));
 
 			row.setClickable(true);
 			row.setFocusable(true);
@@ -204,37 +237,12 @@ public final class ShutUp extends ListActivity {
 		}
 
 		/**
-		 * Delegates creating/removing alarms for event to OnBootReceiver 
+		 * Delegates creating/removing alarms for event to AlarmHelper 
 		 * @param idString - database id for event to set alarm for (string)
 		 */
 		public void setEventAlarms(String idString) {
-			Cursor c = helper.getEventById(idString);
-			if (!(c.getCount() > 0)) {
-				Log.e("ShutUp", "Problem setting/cancelling alarm - could not get event!");
-				return;
-			}
-			c.moveToFirst();
-
-			String volumeString = helper.getRingVolume(c);
-			RingVolume volume = getRingVolumeEnumFromVolumeId(volumeString);
-			long startTime = Long.parseLong(helper.getStartTime(c));
-			long endTime = Long.parseLong(helper.getEndTime(c));
-			int eventId = Integer.parseInt(helper.getEventId(c));
-
-			//Enable alarm if we want to alter ring volume
-			boolean enabled = true;
-			if (volume == RingVolume.NOT_SELECTED) {
-				enabled = false;
-			}
-			int flag = (enabled ?
-					PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-						PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
-
-			ComponentName component = new ComponentName(ShutUp.this, OnBootReceiver.class);
-			getPackageManager().setComponentEnabledSetting(component, flag, PackageManager.DONT_KILL_APP);
-
-			if (enabled) { OnBootReceiver.setAlarm(ShutUp.this, startTime, endTime, eventId, volumeString); }
-			else 		 { OnBootReceiver.cancelAlarm(ShutUp.this, eventId, volumeString);}
+			CalendarEvent event = helper.getCalendarEventObjectById(idString);
+			AlarmHelper.handleAlarms(ShutUp.this, event);
 		}
 
 		/**
@@ -261,7 +269,7 @@ public final class ShutUp extends ListActivity {
 		CalendarEventHolder(View row) {
 			title = (TextView) row.findViewById(R.id.title);
 			time = (TextView) row.findViewById(R.id.time);	
-			image = (ImageView) row.findViewById(R.id.buttonIcon);
+			image = (ImageView) row.findViewById(R.id.volume_icon);
 		}
 
 		/**
