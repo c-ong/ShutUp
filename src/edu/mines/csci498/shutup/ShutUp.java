@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -105,46 +106,45 @@ public final class ShutUp extends ListActivity {
 
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
 			holder.populateFrom(c, helper);
-			updateRowFromRingVolume(row, helper.getRingVolume(c));
-			
+			updateRowFromRingVolume(row, getRingVolumeEnumFromVolumeId(helper.getRingVolume(c)));
 			holder.button.setOnClickListener(new ToggleRingerListener(c, row));
 		}
 		
 		class ToggleRingerListener implements View.OnClickListener {
 			
-			Cursor c;
+			String idString;
 			View rowView;
+			RingVolume volume;
 			
-			public ToggleRingerListener(Cursor c, View rowView) {
-				this.c = c;
+			public ToggleRingerListener(Cursor cursor, View rowView) {
 				this.rowView = rowView;
+				
+				idString = helper.getId(cursor);
+				volume = getRingVolumeEnumFromVolumeId(helper.getRingVolume(cursor));
 			}
 
 			public void onClick(View v) {
-				RingVolume volume = RingVolume.values()[Integer.parseInt(helper.getRingVolume(c)) - 1];
 							
 				switch (volume) {
 				case NOT_SELECTED:
-					helper.updateRingVolume(helper.getId(c), RingVolume.SILENT.getId());
+					helper.updateRingVolume(idString, RingVolume.SILENT.getId());
+					volume = RingVolume.SILENT;
 					break;
 				case SILENT:
-					helper.updateRingVolume(helper.getId(c), RingVolume.VIBRATE.getId());
+					helper.updateRingVolume(idString, RingVolume.VIBRATE.getId());
+					volume = RingVolume.VIBRATE;
 					break;
 				case VIBRATE:
-					helper.updateRingVolume(helper.getId(c), RingVolume.LOUD.getId());
+					helper.updateRingVolume(idString, RingVolume.LOUD.getId());
+					volume = RingVolume.LOUD;
 					break;
 				case LOUD:
-					helper.updateRingVolume(helper.getId(c), RingVolume.NOT_SELECTED.getId());
+					helper.updateRingVolume(idString, RingVolume.NOT_SELECTED.getId());
+					volume = RingVolume.NOT_SELECTED;
 					break;
 				}
 				
-				//Refresh cursor
-				c = helper.getEventById(helper.getId(c));
-				if (c.getCount() > 0) {
-					c.moveToFirst();
-					updateRowFromRingVolume(rowView, helper.getRingVolume(c));
-					helper.printAllEvents();
-				}
+				updateRowFromRingVolume(rowView, volume);
 			}
 		};
 
@@ -161,7 +161,7 @@ public final class ShutUp extends ListActivity {
 			CalendarEventHolder holder = new CalendarEventHolder(row);
 
 			row.setTag(holder);
-			updateRowFromRingVolume(row, helper.getRingVolume(c));
+			updateRowFromRingVolume(row, getRingVolumeEnumFromVolumeId(helper.getRingVolume(c)));
 			return row;
 		}
 
@@ -170,10 +170,8 @@ public final class ShutUp extends ListActivity {
 		 * @param row - row to update color for
 		 * @param volume - ring volume for current event
 		 */
-		private void updateRowFromRingVolume(View row, String volumeString) {
+		private void updateRowFromRingVolume(View row, RingVolume volume) {
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
-
-			RingVolume volume = getRingVolumeEnumFromVolumeId(volumeString);
 
 			switch (volume) {
 			case NOT_SELECTED:

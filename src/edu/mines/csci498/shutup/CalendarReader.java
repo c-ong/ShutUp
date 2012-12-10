@@ -35,9 +35,6 @@ public class CalendarReader {
 
 		HashSet<String> calendarIds = (HashSet<String>) getCalendars();
 		List<CalendarEvent> events = getEvents(calendarIds);
-		for (CalendarEvent e : events) {
-			Log.i("CalendarReader", e.toString());
-		}
 		return events;
 	}
 
