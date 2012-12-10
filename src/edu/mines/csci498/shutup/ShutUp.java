@@ -250,9 +250,12 @@ public final class ShutUp extends ListActivity {
 		 */
 		void populateFrom(Cursor c, EventHelper helper) {
 			title.setText(helper.getTitle(c));
-			time.setText(formatDateString(Long.parseLong(helper.getStartTime(c))) + 
-					" \nto " + 
-					formatDateString(Long.parseLong(helper.getStartTime(c))));
+			StringBuilder timeString = new StringBuilder();
+			//timeString.append("     ");
+			timeString.append(formatDateString(Long.parseLong(helper.getStartTime(c))));
+			timeString.append("\nto ");
+			timeString.append(formatDateString(Long.parseLong(helper.getEndTime(c))));
+			time.setText(timeString);
 		}
 
 		/**
