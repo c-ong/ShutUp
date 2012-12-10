@@ -145,6 +145,7 @@ public final class ShutUp extends ListActivity {
 				}
 				
 				updateRowFromRingVolume(rowView, volume);
+				setEventStartAlarm(idString);
 			}
 		};
 
@@ -193,7 +194,14 @@ public final class ShutUp extends ListActivity {
 			}	
 		}
 
-		public void setEventStartAlarm(Cursor c) {
+		public void setEventStartAlarm(String idString) {
+			Cursor c = helper.getEventById(idString);
+			if (!(c.getCount() > 0)) {
+				Log.e("ShutUp", "Problem setting/cancelling alarm - could not get event!");
+				return;
+			}
+			c.moveToFirst();
+			
 			String volumeString = helper.getRingVolume(c);
 			RingVolume volume = getRingVolumeEnumFromVolumeId(volumeString);
 			long startTime = Long.parseLong(helper.getStartTime(c));

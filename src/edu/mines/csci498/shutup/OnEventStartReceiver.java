@@ -12,7 +12,7 @@ public class OnEventStartReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (intent != null) {
-			String volumeString = (String) intent.getExtras().get(OnBootReceiver.EXTRA_VOLUME_STRING);
+			String volumeString = (String) intent.getStringExtra(OnBootReceiver.EXTRA_VOLUME_STRING);
 			changeRingVolume(context, volumeString);
 		}
 		else {
@@ -22,7 +22,7 @@ public class OnEventStartReceiver extends BroadcastReceiver {
 	}
 
 	private void changeRingVolume(Context context, String volumeString) {
-		Log.i("OnEventStart", "Changing volume!");
+		
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		
 		RingVolume volume = RingVolume.values()[Integer.parseInt(volumeString) - 1];
@@ -43,7 +43,7 @@ public class OnEventStartReceiver extends BroadcastReceiver {
 		case LOUD:
 			audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 			audioManager.setStreamVolume(AudioManager.STREAM_RING, 
-					audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_SHOW_UI + AudioManager.FLAG_PLAY_SOUND);
+			audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_SHOW_UI);
 			break;
 		}	
 	}

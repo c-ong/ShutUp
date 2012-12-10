@@ -102,7 +102,8 @@ public class EventHelper extends SQLiteOpenHelper {
 		return getReadableDatabase()
 			.rawQuery("SELECT * " +
 					  "FROM events, ring_volumes " +
-					  "WHERE events.ring_volume_id = ring_volumes._id ",
+					  "WHERE events.ring_volume_id = ring_volumes._id " +
+					  "ORDER BY events.start_time",
 					  null);
 	}
 	
