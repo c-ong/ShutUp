@@ -103,13 +103,15 @@ public final class ShutUp extends ListActivity {
 		 */
 		@Override
 		public void bindView(View row, Context ctx, Cursor c) {
-
 			CalendarEventHolder holder = (CalendarEventHolder) row.getTag();
 			holder.populateFrom(c, helper);
 			updateRowFromRingVolume(row, getRingVolumeEnumFromVolumeId(helper.getRingVolume(c)));
 			holder.button.setOnClickListener(new ToggleRingerListener(c, row));
 		}
 		
+		/**
+		 * Button click listener to toggle ring volume
+		 */
 		class ToggleRingerListener implements View.OnClickListener {
 			
 			String idString;
@@ -118,13 +120,14 @@ public final class ShutUp extends ListActivity {
 			
 			public ToggleRingerListener(Cursor cursor, View rowView) {
 				this.rowView = rowView;
-				
 				idString = helper.getId(cursor);
 				volume = getRingVolumeEnumFromVolumeId(helper.getRingVolume(cursor));
 			}
 
-			public void onClick(View v) {
-							
+			/**
+			 * Toggles volume on button click and delegates updating the database, UI, and alarms
+			 */
+			public void onClick(View v) {				
 				switch (volume) {
 				case NOT_SELECTED:
 					helper.updateRingVolume(idString, RingVolume.SILENT.getId());
@@ -145,7 +148,7 @@ public final class ShutUp extends ListActivity {
 				}
 				
 				updateRowFromRingVolume(rowView, volume);
-				setEventStartAlarm(idString);
+				setEventAlarms(idString);
 			}
 		};
 
@@ -194,7 +197,11 @@ public final class ShutUp extends ListActivity {
 			}	
 		}
 
-		public void setEventStartAlarm(String idString) {
+		/**
+		 * Delegates creating/removing alarms for event to OnBootReceiver 
+		 * @param idString - database id for event to set alarm for (string)
+		 */
+		public void setEventAlarms(String idString) {
 			Cursor c = helper.getEventById(idString);
 			if (!(c.getCount() > 0)) {
 				Log.e("ShutUp", "Problem setting/cancelling alarm - could not get event!");
@@ -205,23 +212,30 @@ public final class ShutUp extends ListActivity {
 			String volumeString = helper.getRingVolume(c);
 			RingVolume volume = getRingVolumeEnumFromVolumeId(volumeString);
 			long startTime = Long.parseLong(helper.getStartTime(c));
+			long endTime = Long.parseLong(helper.getEndTime(c));
 			int eventId = Integer.parseInt(helper.getEventId(c));
 
+			//Enable alarm if we want to alter ring volume
 			boolean enabled = true;
 			if (volume == RingVolume.NOT_SELECTED) {
 				enabled = false;
 			}
 			int flag = (enabled ?
 					PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-						PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+					PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
 			ComponentName component = new ComponentName(ShutUp.this, OnBootReceiver.class);
 			getPackageManager().setComponentEnabledSetting(component, flag, PackageManager.DONT_KILL_APP);
 
-			if (enabled) { OnBootReceiver.setAlarm(ShutUp.this, startTime, eventId, volumeString);   }
+			if (enabled) { OnBootReceiver.setAlarm(ShutUp.this, startTime, endTime, eventId, volumeString); }
 			else 		 { OnBootReceiver.cancelAlarm(ShutUp.this, eventId, volumeString);}
 		}
 
+		/**
+		 * Returns the RingVolume enum of a volume id
+		 * @param volumeString - id for volume (from database)
+		 * @return - RingVolume enum for given volume id
+		 */
 		public RingVolume getRingVolumeEnumFromVolumeId(String volumeString) {
 			return RingVolume.values()[Integer.parseInt(volumeString) - 1];
 		}
@@ -251,7 +265,6 @@ public final class ShutUp extends ListActivity {
 		void populateFrom(Cursor c, EventHelper helper) {
 			title.setText(helper.getTitle(c));
 			StringBuilder timeString = new StringBuilder();
-			//timeString.append("     ");
 			timeString.append(formatDateString(Long.parseLong(helper.getStartTime(c))));
 			timeString.append("\nto ");
 			timeString.append(formatDateString(Long.parseLong(helper.getEndTime(c))));

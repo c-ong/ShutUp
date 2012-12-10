@@ -27,7 +27,6 @@ public class OnEventStartReceiver extends BroadcastReceiver {
 		
 		RingVolume volume = RingVolume.values()[Integer.parseInt(volumeString) - 1];
 		
-		//Probably don't need flags, good for debugging
 		switch (volume) {
 		case NOT_SELECTED:
 			Log.e("OnEventStartReceiver", "Shouldn't have set an alarm for an unselected ring volume!");
