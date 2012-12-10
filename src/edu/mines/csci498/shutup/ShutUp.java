@@ -144,7 +144,6 @@ public final class ShutUp extends ListActivity {
 
 			row.setClickable(true);
 			row.setFocusable(true);
-			row.setBackgroundResource(android.R.drawable.menuitem_background);
 			row.setOnClickListener(new ToggleRingerListener(c, row));
 		}
 
