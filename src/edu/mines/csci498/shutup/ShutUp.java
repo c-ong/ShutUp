@@ -50,6 +50,7 @@ public final class ShutUp extends ListActivity {
 	public void onDestroy() {
 		eventCursor.close();
 		helper.close();
+		super.onDestroy();
 	}
 	
 	@Override
@@ -63,7 +64,6 @@ public final class ShutUp extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
 	        case R.id.refresh:
-	        	Log.i("ShutUp", "Refreshing...");
 	        	deletePastEvents();
 	    		refreshEvents();
 	    		configureList();

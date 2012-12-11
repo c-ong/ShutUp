@@ -27,10 +27,12 @@ public class AlarmHelper {
 	 * @param event - event to set alarms for
 	 */
 	public static void setAlarm(Context context, CalendarEvent event) {
+		//Enable OnEventStartReceiver
+		ComponentName component = new ComponentName(context, OnEventStartReceiver.class);
+		context.getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+		
 		AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		int currentVolumeId = getVolumeIdForCurrentRingVolume(context);
-		
-		Log.e("AlarmHelper.StartAlarm", "Event: " + event + " Volume: " + currentVolumeId);
 
 		manager.set(AlarmManager.RTC_WAKEUP, event.getStartTime(), 
 				getPendingIntent(context, event.getEventId(), event.getRingVolume().getId())); //Event start
@@ -49,7 +51,6 @@ public class AlarmHelper {
 
 		manager.cancel(getPendingIntent(context, event.getEventId(), event.getRingVolume().getId())); //EventStart
 		manager.cancel(getPendingIntent(context, -1 * event.getEventId(), event.getRingVolume().getId())); //Event end
-		Log.i("AlarmHelper", "Cancel alarm!");
 	}
 
 	/**
@@ -102,7 +103,6 @@ public class AlarmHelper {
 		c.moveToFirst();
 		do {
 			CalendarEvent event = helper.getCalendarEventObjectById(helper.getId(c));
-			Log.i("AlarmHelper", "Creating alarms for event: " + event);
 			AlarmHelper.handleAlarms(context, event);
 			
 		} while (c.moveToNext());
@@ -120,12 +120,6 @@ public class AlarmHelper {
 		if (event.getRingVolume() == RingVolume.NOT_SELECTED) {
 			enabled = false;
 		}
-		int componentState = (enabled ?
-				PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-				PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
-
-		ComponentName component = new ComponentName(context, OnEventStartReceiver.class);
-		context.getPackageManager().setComponentEnabledSetting(component, componentState, PackageManager.DONT_KILL_APP);
 
 		if (enabled) { AlarmHelper.setAlarm(context, event);    }
 		else 		 { AlarmHelper.cancelAlarm(context, event); }
